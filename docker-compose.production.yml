@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  gen_certs: &gen_certs
+    image: gen_certs_certbot
+    build:
+      context: ./compose/production/gen_certs
+    volumes:
+      - letsencrypt_config:/etc/letsencrypt
+      - letsencrypt_lib:/var/lib/letsencrypt
+      - ./dummy_index.html:/data/letsencrypt/index.html
+      - letsencrypt_logs:/var/logs/letsencrypt
+    networks:
+      - main_network
+    environment:
+      - HOSTS=${NGINX_HOSTS:?NGINX Hosts are not defined}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:?Admin email is not defined}
+
+  manage_certs:
+    <<: *gen_certs
+    image: alpine:3.8
+    command: sh
+
+
+volumes:
+  letsencrypt_config: {}
+  letsencrypt_lib: {}
+  letsencrypt_logs: {}
